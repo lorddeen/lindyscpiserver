@@ -13,13 +13,14 @@ class BattDisGen:
         self.timeoffset = 3600 #seconds
         print("inicialization complete")
 
-    def generate(self):
+    def generate(self, timestep=1, exponent=0.005, chargedbattvolt=13, dischargecurve=4, timeoffset=3600):
         #defining time array
-        self.time = numpy.arange(0, self.timeoffset,self.timestep)
+        self.time = numpy.arange(0, timeoffset,timestep)
         print("time defined")
         #calculating discharge voltage curve
-        self.discurve = self.chargedbattvolt - self.dischargecurve*numpy.exp(self.exponent*(self.time-self.timeoffset))
+        self.discurve = chargedbattvolt - dischargecurve*numpy.exp(exponent*(self.time-timeoffset))
         print("Discharge curve calculated")
+        self.display()
         #plotting the discharge curve
     def display(self):
         plt.plot(self.time,self.discurve)
@@ -29,8 +30,8 @@ class BattDisGen:
         plt.show()
         print("Discharge curve plotted")
 
-     #testing the class 
-if __name__ == "__main__":
-    batt = BattDisGen()
-    batt.generate()
-    batt.display()  
+# testing the class
+#if __name__ == "__main__":
+#    batt = BattDisGen()
+#    batt.generate()
+   
