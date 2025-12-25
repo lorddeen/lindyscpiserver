@@ -1,11 +1,9 @@
 import numpy
-import csv
 import matplotlib.pyplot as plt
 
 #inicialization of variables
 class BattDisGen:
     def __init__(self):
-        pass
         self.timestep = 1 #seconds
         self.exponent = 0.005
         self.chargedbattvolt = 13 #volts
@@ -31,7 +29,7 @@ class BattDisGen:
         print("Discharge curve plotted")
 
 # testing the class
-#if __name__ == "__main__":
-#    batt = BattDisGen()
-#    batt.generate()
+if __name__ == "__main__":
+    batt = BattDisGen()
+    batt.generate()
    
