@@ -21,11 +21,11 @@ class KeysightScpiCommands:
 
 
     
-
-if __name__ == "__main__":
-    scpi = KeysightScpiCommands()
-    scpi.receive_message("*IDN?")
-    scpi.receive_message("MEAS:VOLT?")
-    scpi.receive_message("MEAS:CURR?")
-    scpi.receive_message("MEAS:RES?")
-    scpi.receive_message("DUDE")    
+# testing the class
+#if __name__ == "__main__":
+#    scpi = KeysightScpiCommands()
+#    scpi.receive_message("*IDN?")
+#    scpi.receive_message("MEAS:VOLT?")
+#    scpi.receive_message("MEAS:CURR?")
+#    scpi.receive_message("MEAS:RES?")
+#    scpi.receive_message("DUDE")    
