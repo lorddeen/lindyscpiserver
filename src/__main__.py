@@ -13,7 +13,7 @@ class SCPI_Server:
         self.dataset = []
         self.time = []
 
-    def data_generator():
+    def data_generator(self):
         curve = dataset() #create an instance of the BattDisGen class
         curve.__init__()
         print("Generating data...")
@@ -24,9 +24,11 @@ class SCPI_Server:
 
     def handover(self):
 
+        print(f"Handing over data point {self.datacounter}")
         datapoint = self.dataset[self.datacounter]
         datapoint_s = f"{datapoint}\n".encode('utf-8')
         self.datacounter += 1
+
         return datapoint_s,
     
     def start_server(self, host, port):
@@ -52,7 +54,7 @@ class SCPI_Server:
                         continue
                     if command:
                         print(f"Received command: {command}")
-                        response = scpi.receive_message(command, SCPI_Server.handover())
+                        response = scpi.receive_message(command, self.handover())
                         conn.sendall(response.encode('utf-8'))
 
 
@@ -60,13 +62,14 @@ class SCPI_Server:
 if __name__ == "__main__":
     HOST = "127.0.0.1" #localhost
     PORT = 5025#standard SCPI port
-    datacounter = 0
-
+    server=SCPI_Server()
+    server.__init__()
+ 
     try:
-        time, data = SCPI_Server.data_generator()
+        server.time, server.data = server.data_generator()
     except Exception as e:
         print(f"Error generating data: {e}")
         exit(1)
 
     scpi = ksc() #create an instance of the keysight commands class
-    SCPI_Server.start_server(scpi, HOST, PORT) #start the SCPI server
+    server.start_server(HOST, PORT) #start the SCPI server
