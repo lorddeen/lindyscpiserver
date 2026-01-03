@@ -3,11 +3,11 @@ class KeysightScpiCommands:
     def __init__(self):
         self.ID = "KEYSIGHT TECHNOLOGIES,34461A,MY53208924,A.02.17-02.40-02.17-00.52-03-01" #Device Identification String
 
-    def receive_message(self, command: str): # Simulate SCPI command responses
+    def receive_message(self, command: str, datapoint_s: str): # Simulate SCPI command responses
         if command == "*IDN?":
             response = self.ID
         elif command == "MEAS:VOLT?":
-                response = "1.2000E+01"
+                response = datapoint_s
         elif command == "MEAS:CURR?":
             response = "1.000E-03"
         elif command == "MEAS:RES?":
