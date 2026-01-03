@@ -20,11 +20,21 @@ def start_server(self, host, port):
                 data = conn.recv(1024)
                 if not data:
                     break
-                command = data.decode('utf-8').strip()
-           # Take only the first line
-                print(f"Received command: {command}")
+                messages = data.decode('utf-8').splitlines()
+                if not messages:
+                    #print("No command received")
+                    continue
+                
+                
+                command = messages[0].strip()
+                if not command:
+                    #print("No command received")
+                    continue
+                if command:
+                    print(f"Received command: {command}")
                 response = scpi.receive_message(command)
                 conn.sendall(response.encode('utf-8'))
+
 
 if __name__ == "__main__":
     HOST = "127.0.0.1" #localhost
