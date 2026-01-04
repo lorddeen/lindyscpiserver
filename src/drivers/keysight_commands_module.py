@@ -1,4 +1,4 @@
-class KeysightScpiCommands:
+class KeysightGenericCommands:
 
     def __init__(self):
         self.ID = "LINDY TECHNOLOGIES,AABBCC,5318008,A.02.17-02.40-02.17-00.52-03-01" #Device Identification String

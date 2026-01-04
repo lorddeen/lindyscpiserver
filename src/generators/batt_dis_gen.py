@@ -1,8 +1,8 @@
 import numpy
 import matplotlib.pyplot as plt
 
-#inicialization of variables
-class BattDisGen:#battery discharge curve generator class
+
+class AGM12VGeneric:#battery discharge curve generator class
     def __init__(self) -> None:
         self.timestep = 1 #seconds
         self.exponent = 0.005

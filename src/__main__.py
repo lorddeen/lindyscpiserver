@@ -1,9 +1,7 @@
-#import numpy #for algorithms
-import pyvisa #for scpi commands
-#import matplotlib as plt #for display
+
 #import argparse #for command line arguments
-from keysight_commands_module import KeysightScpiCommands as ksc #importing the keysight commands class
-from batt_dis_gen import BattDisGen as dataset #importing the battery discharge generator class
+from drivers.keysight_commands_module import KeysightGenericCommands as kgc #importing the keysight commands class
+from generators.batt_dis_gen import AGM12VGeneric as generator #importing the battery discharge generator class
 import socket
 
 class SCPI_Server:
@@ -14,7 +12,7 @@ class SCPI_Server:
         self.time = []
 
     def data_generator(self):
-        curve = dataset() #create an instance of the BattDisGen class
+        curve = generator() #create an instance of the generator class
         curve.__init__()
         print("Generating data...")
         curve.generate()
@@ -66,6 +64,6 @@ if __name__ == "__main__":
         print(f"Error generating data: {e}")
         exit(1)
 
-    scpi = ksc() #create an instance of the keysight commands class
+    scpi = kgc() #create an instance of the keysight commands class
     server.start_server(HOST, PORT) #start the SCPI server
     print("Server stopped.")
