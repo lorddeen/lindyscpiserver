@@ -1,7 +1,7 @@
 class KeysightGenericCommands:
 
     def __init__(self):
-        self.ID = "LINDY TECHNOLOGIES,AABBCC,5318008,A.02.17-02.40-02.17-00.52-03-01" #Device Identification String
+        self.ID = "LINDY TECHNOLOGIES,AABBCC,!!ONLY VOLTAGE MEASUREMENTS NOW!!" #Device Identification String
 
     def receive_message(self, command: str, datapoint_s: str): # Simulate SCPI command responses
         if not datapoint_s:
@@ -12,9 +12,9 @@ class KeysightGenericCommands:
         elif command == "MEAS:VOLT?":
                 response = datapoint_s
         elif command == "MEAS:CURR?":
-            response = "1.000E-03"
+            response = "NICE TRY, NO CURRENT MEASUREMENT"
         elif command == "MEAS:RES?":
-            response = "1.000E+02"
+            response = "NICE TRY, NO RESISTANCE MEASUREMENT"
         else:
             response = "ERROR: Unknown Command"
         print(response)

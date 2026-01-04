@@ -10,7 +10,6 @@ class AGM12VGeneric:#battery discharge curve generator class
         self.dischargecurve = 4
         self.timeoffset = 3600 #seconds
         self.counter = 0
-        print("inicialization complete")
 
     def generate(self):
         #defining time array
