@@ -4,6 +4,9 @@ MOCK server purposed to simulate measurement tool like osciloscope or Multimeter
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
+## Version
+0.1.0 - unstable prototype - use with caution.
+
 ## SCPI Commands
 At this moment it simulates Keysight SCPI general commands for DMM via LXI. test it with RAW Data on 127.0.0.1:5025
 
