@@ -10,7 +10,7 @@ class SCPI_Server:
 
     def __init__(self):
         self.datacounter = 0
-        self.dataset = []
+        self.data = []
         self.time = []
 
     def data_generator(self):
@@ -22,15 +22,7 @@ class SCPI_Server:
         curve.display()
         return curve.time, curve.discurve
 
-    def handover(self):
 
-        print(f"Handing over data point {self.datacounter}")
-        datapoint = self.dataset[self.datacounter]
-        datapoint_s = f"{datapoint}\n".encode('utf-8')
-        self.datacounter += 1
-
-        return datapoint_s,
-    
     def start_server(self, host, port):
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s: #create a TCP socket
@@ -54,7 +46,10 @@ class SCPI_Server:
                         continue
                     if command:
                         print(f"Received command: {command}")
-                        response = scpi.receive_message(command, self.handover())
+                        if self.datacounter >= len(self.data):
+                            self.datacounter = 0
+                        response = scpi.receive_message(command, f"{self.data[self.datacounter]}")
+                        self.datacounter += 1
                         conn.sendall(response.encode('utf-8'))
 
 
@@ -73,3 +68,4 @@ if __name__ == "__main__":
 
     scpi = ksc() #create an instance of the keysight commands class
     server.start_server(HOST, PORT) #start the SCPI server
+    print("Server stopped.")

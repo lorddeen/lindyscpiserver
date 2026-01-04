@@ -2,7 +2,7 @@ import numpy
 import matplotlib.pyplot as plt
 
 #inicialization of variables
-class BattDisGen:
+class BattDisGen:#battery discharge curve generator class
     def __init__(self) -> None:
         self.timestep = 1 #seconds
         self.exponent = 0.005
@@ -23,12 +23,6 @@ class BattDisGen:
 
         #plotting the discharge curve
     def display(self):
-        plt.plot(self.time,self.discurve)
-        plt.title("Battery discharge curve for AGM Battery (common)")
-        plt.xlabel("Time (seconds)")
-        plt.ylabel("Voltage (V)")
-        plt.show()
-        print("Discharge curve plotted")
         plt.plot(self.time,self.discurve)
         plt.title("Battery discharge curve for AGM Battery (common)")
         plt.xlabel("Time (seconds)")

@@ -1,9 +1,12 @@
 class KeysightScpiCommands:
 
     def __init__(self):
-        self.ID = "KEYSIGHT TECHNOLOGIES,34461A,MY53208924,A.02.17-02.40-02.17-00.52-03-01" #Device Identification String
+        self.ID = "LINDY TECHNOLOGIES,AABBCC,5318008,A.02.17-02.40-02.17-00.52-03-01" #Device Identification String
 
     def receive_message(self, command: str, datapoint_s: str): # Simulate SCPI command responses
+        if not datapoint_s:
+            datapoint_s = "ERROR: NO DATA"
+
         if command == "*IDN?":
             response = self.ID
         elif command == "MEAS:VOLT?":
