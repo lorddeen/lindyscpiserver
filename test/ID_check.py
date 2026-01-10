@@ -1,7 +1,8 @@
 import pyvisa
 import time
-import numpy as np
-import matplotlib.pyplot as plt
+import datetime
+#import numpy as np
+#import matplotlib.pyplot as plt
 
 #inicialization
 VISA_ADRESS = 'TCPIP0:127.0.0.1::5025::SOCKET'
