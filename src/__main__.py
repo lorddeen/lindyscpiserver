@@ -27,29 +27,41 @@ class SCPI_Server:
             s.bind((host, port))
             s.listen()
             print(f"SCPI Server listening on {host}:{port}")
-            conn, addr = s.accept()
-            with conn:
-             print(f"Connected by {addr}")
+            
 
 
-             while True: #main server loop
-                    data = conn.recv(1024)
-                    if not data:
-                       break
-                    messages = data.decode('utf-8').splitlines()
-                    if not messages:
-                       continue
-                    command = messages[0].strip()
-                    if not command:
-                        continue
-                    if command:
-                        print(f"Received command: {command}")
-                        if self.datacounter >= len(self.data):
-                            self.datacounter = 0
-                        response = scpi.receive_message(command, f"{self.data[self.datacounter]}")
-                        self.datacounter += 1
-                        conn.sendall(response.encode('utf-8'))
-
+            while True: #main server loop - waits for new connections
+                conn, addr = s.accept()
+                with conn:
+                    print(f"Connected by {addr}")
+                    while True: #connection loop - waits for messages from the client
+                        try:
+                            data = conn.recv(1024)
+                            if not data:
+                                print(f"Connection with {addr} closed.")
+                                break
+                            messages = data.decode('utf-8').splitlines()
+                            if not messages:
+                                continue
+                            command = messages[0].strip()
+                            if not command:
+                                continue
+                            if command:
+                                print(f"Received command: {command}")
+                                if self.datacounter >= len(self.data):
+                                    self.datacounter = 0
+                                response = scpi.receive_message(command, f"{self.data[self.datacounter]}")
+                                self.datacounter += 1
+                                conn.sendall((response+"\n").encode('utf-8'))
+                        except ConnectionResetError:
+                            print(f"Connection with {addr} reset.")
+                            break
+                        except Exception as e:
+                            print(f"UnexpectedError: {e}")
+                            break
+                        except KeyboardInterrupt:
+                            print("Server loop stopped by user...")
+                            break
 
 
 if __name__ == "__main__":
@@ -62,8 +74,16 @@ if __name__ == "__main__":
         server.time, server.data = server.data_generator()
     except Exception as e:
         print(f"Error generating data: {e}")
+        input("Press Enter to exit...")
         exit(1)
 
+        
+
     scpi = kgc() #create an instance of the keysight commands class
-    server.start_server(HOST, PORT) #start the SCPI server
-    print("Server stopped.")
+    try:
+        scpi.__init__() #initialize the keysight commands class
+        server.start_server(HOST, PORT) #start the SCPI server
+    except KeyboardInterrupt:
+        input("Press Enter to exit...")
+    finally:
+        print("Server stopped.")
