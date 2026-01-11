@@ -3,6 +3,7 @@
 from drivers.keysight_commands_module import KeysightGenericCommands as kgc #importing the keysight commands class
 from generators.batt_dis_gen import AGM12VGeneric as generator #importing the battery discharge generator class
 import socket
+import json
 
 class SCPI_Server:
 
