@@ -9,6 +9,7 @@ class KeysightGenericCommands:
         self.RESOLUTION = 5 #Measurement resolution initialization
 
     def receive_message(self, command: str, datapoint_s: str): # Simulate SCPI command responses
+        command = command.upper()
         if not datapoint_s:
             datapoint_s = "ERROR: NO DATA"
 
