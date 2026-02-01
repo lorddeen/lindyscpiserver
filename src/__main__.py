@@ -1,11 +1,13 @@
 
 #import argparse #for command line arguments
-from drivers.keysight_commands_module import KeysightGenericCommands as kgc #importing the keysight commands class
+from drivers.drivers import KeysightGenericCommands as kgc #importing the keysight commands class
+from drivers.drivers import GenericCommands as gc #importing the generic commands class
 from generators.batt_dis_gen import AGM12VGeneric as generator #importing the battery discharge generator class
 import socket
 import json
 import os
 from pathlib import Path
+
 
 class SCPI_Server:
 
@@ -19,7 +21,14 @@ class SCPI_Server:
         with open(Path(__file__).parent / "config/config.json", 'r', encoding="utf-8") as f:
             self.config = json.load(f)
             self.HOST = self.config.get("HOST")
-            self.PORT = self.config.get("PORT")  
+            self.PORT = self.config.get("PORT")
+            driver_name = self.config.get("DRIVER")  
+            if driver_name == "keysight":
+                self.parser = kgc
+                print("Using Keysight driver")
+            else:
+                self.parser = gc
+                print("Using Generic driver")
 
     def data_generator(self):
         curve = generator() #create an instance of the generator class
@@ -32,7 +41,7 @@ class SCPI_Server:
 
 
     def start_server(self):
-        scpi = kgc() #create an instance of the keysight commands class
+        scpi = self.parser() #create an instance of the selected commands class
         
         #starting the SCPI server
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s: #create a TCP socket

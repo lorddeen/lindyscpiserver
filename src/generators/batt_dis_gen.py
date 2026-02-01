@@ -26,6 +26,7 @@ class AGM12VGeneric:#battery discharge curve generator class
         plt.title("Battery discharge curve for AGM Battery (common)")
         plt.xlabel("Time (seconds)")
         plt.ylabel("Voltage (V)")
+        plt.savefig("battery_discharge_curve.png")
         plt.show()
         print("Discharge curve plotted")
 
