@@ -1,5 +1,6 @@
 
 #import argparse #for command line arguments
+from ast import While
 from drivers.drivers import KeysightGenericCommands as kgc #importing the keysight commands class
 from drivers.drivers import GenericCommands as gc #importing the generic commands class
 from generators.batt_dis_gen import AGM12VGeneric as generator #importing the battery discharge generator class
@@ -7,7 +8,8 @@ import socket
 import json
 import os
 from pathlib import Path
-
+import time
+import threading
 
 class SCPI_Server:
 
@@ -84,11 +86,25 @@ class SCPI_Server:
                         self.datacounter += 1
                         conn.sendall(response.encode('utf-8'))
 
+class TimeManager:
+    def __init__(self):
+        self.start_time = time.time()
+        thread=threading.Thread(target=self.TimeDisplay,daemon=True)
+        thread.start()
+
+    def TimeDisplay(self):
+        while True:
+            elapsed_time = time.time() - self.start_time
+            print(f"Elapsed Time: {elapsed_time:.2f} seconds")
+            time.sleep(2)
+
 
 
 if __name__ == "__main__":
 
     server=SCPI_Server()
+    timer=TimeManager()
+
     try:
         server.time, server.data = server.data_generator()
     except Exception as e:
