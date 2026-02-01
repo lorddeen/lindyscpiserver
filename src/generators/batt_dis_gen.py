@@ -11,7 +11,7 @@ class AGM12VGeneric:#battery discharge curve generator class
         self.timeoffset = 3600 #seconds
         self.counter = 0
 
-    def generate(self):
+    def generate_fullset(self):
         #defining time array
         self.time = numpy.arange(0, self.timeoffset,self.timestep)
         print("time defined")
@@ -19,6 +19,10 @@ class AGM12VGeneric:#battery discharge curve generator class
         self.discurve = self.chargedbattvolt - self.dischargecurve*numpy.exp(self.exponent*(self.time-self.timeoffset))
         print("Discharge curve calculated")
         #self.display()
+
+    def generate(self, time_instant):
+        data = self.chargedbattvolt - self.dischargecurve*numpy.exp(self.exponent*(time_instant-self.timeoffset))
+        return data
 
         #plotting the discharge curve
     def display(self):

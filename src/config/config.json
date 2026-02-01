@@ -2,6 +2,7 @@
 "HOST": "127.0.0.1",
 "PORT": 5025,
 "DRIVER": "generic",
-"GENERATOR": "agm_12v_generic"
+"GENERATOR": "agm_12v_generic",
+"TIMER": "realtime"
 
 }

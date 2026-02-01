@@ -31,12 +31,18 @@ class SCPI_Server:
             else:
                 self.parser = gc
                 print("Using Generic driver")
+            self.timer_type = self.config.get("TIMER")
+        
+      
+
+
 
     def data_generator(self):
-        curve = generator() #create an instance of the generator class
+         #create an instance of the generator class
+        curve = generator()
         curve.__init__()
         print("Generating data...")
-        curve.generate()
+        curve.generate_fullset()
         print("Data generated.")
         curve.display()
         return curve.time, curve.discurve
@@ -80,17 +86,23 @@ class SCPI_Server:
                         continue
                     if command:
                         print(f"Received command: {command}")
-                        if self.datacounter >= len(self.data):
-                            self.datacounter = 0
-                        response = scpi.receive_message(command, f"{self.data[self.datacounter]}")
-                        self.datacounter += 1
+                        #if self.datacounter >= len(self.data):
+                            #self.datacounter = 0
+                        
+                        current_time = time.time() - timer.start_time
+                        print(f"Current Time: {current_time}")
+                        response = scpi.receive_message(command, f"{curve.generate(current_time)}")
+                        print(f"Sending response: {response} for time {current_time}")
+                        #self.datacounter += 1
                         conn.sendall(response.encode('utf-8'))
 
 class TimeManager:
     def __init__(self):
         self.start_time = time.time()
+        self.start_time_iso = time.ctime()
+        print(f"Timer started at {self.start_time_iso}")
         thread=threading.Thread(target=self.TimeDisplay,daemon=True)
-        thread.start()
+        #thread.start()
 
     def TimeDisplay(self):
         while True:
@@ -101,12 +113,15 @@ class TimeManager:
 
 
 if __name__ == "__main__":
-
-    server=SCPI_Server()
     timer=TimeManager()
+    server=SCPI_Server()
+    curve = generator()
+    
 
+#generate the data set (for voltage measurements)
     try:
-        server.time, server.data = server.data_generator()
+         server.time, server.data = server.data_generator()
+         
     except Exception as e:
         print(f"Error generating data: {e}")
         exit(1)
