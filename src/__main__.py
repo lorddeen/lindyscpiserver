@@ -11,6 +11,7 @@ from pathlib import Path
 import time
 import threading
 import tkinter as tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class SCPI_Server:
 
@@ -111,39 +112,49 @@ class TimeManager:
             print(f"Elapsed Time: {elapsed_time:.2f} seconds")
             time.sleep(2)
 
-def GUI():
-    root = tk.Tk()
-    root.title("SCPI Server GUI")
-    root.geometry("300x400")
-    label = tk.Label(root, text="SCPI Server is running...")
-    label.grid(column=0, row=0, padx=10, pady=10)
-    button = tk.Button(root, text="Start Server", command=root.quit)
-    button.grid(column=0, row=1, padx=10, pady=10)
-    HOST_var=tk.StringVar(value=server.HOST)
+class GUI:
+    def GUI(self):
+        self.root = tk.Tk()
+        self.root.title("SCPI Server GUI")
+        self.root.geometry("300x400")
+        label = tk.Label(self.root, text="SCPI Server is running...")
+        label.grid(column=0, row=0, padx=10, pady=10)
+        button = tk.Button(self.root, text="Start Server", command=self.root.quit)
+        button.grid(column=0, row=1, padx=10, pady=10)
+        HOST_var=tk.StringVar(value=server.HOST)
     
-    label_HOST=tk.Label(root,text="HOST:").grid(column=0, row=2, padx=10, pady=10)
-    HOST_entry=tk.Entry(root,textvariable=HOST_var)
-    HOST_entry.grid(column=0, row=3, padx=10, pady=10)
+        label_HOST=tk.Label(self.root,text="HOST:").grid(column=0, row=2, padx=10, pady=10)
+        HOST_entry=tk.Entry(self.root,textvariable=HOST_var)
+        HOST_entry.grid(column=0, row=3, padx=10, pady=10)
 
-    label_PORT=tk.Label(root,text="PORT:").grid(column=0, row=4, padx=10, pady=10)
-    PORT_var=tk.StringVar(value=str(server.PORT))
-    PORT_entry=tk.Entry(root,textvariable=PORT_var)
-    PORT_entry.grid(column=0, row=5, padx=10, pady=10)
+        label_PORT=tk.Label(self.root,text="PORT:").grid(column=0, row=4, padx=10, pady=10)
+        PORT_var=tk.StringVar(value=str(server.PORT))
+        PORT_entry=tk.Entry(self.root,textvariable=PORT_var)
+        PORT_entry.grid(column=0, row=5, padx=10, pady=10)
+        self.root.mainloop()
+        #self.plotting()
+
+    def plotting(self, time, data):
+        fig, ax = curve.plot_data(time, data)
+        canvas = FigureCanvasTkAgg(fig, master=self.root)
+        canvas.draw()
+        canvas.get_tk_widget().grid(column=0, row=6, padx=10, pady=10)
 
 
-    root.mainloop()
+ 
 
 if __name__ == "__main__":
     timer=TimeManager()
     server=SCPI_Server()
     curve = generator()
-    GUI_thread = threading.Thread(target=GUI, daemon=True)
+    display = GUI()
+    GUI_thread = threading.Thread(target=display.GUI, daemon=True)
     GUI_thread.start()
     
     #generate the data set (for voltage measurements)
     try:
          server.time, server.data = server.data_generator()
-         
+         display.plotting(server.time, server.data)
     except Exception as e:
         print(f"Error generating data: {e}")
         exit(1)
