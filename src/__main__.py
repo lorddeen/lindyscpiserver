@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import time
 import threading
+import tkinter as tk
 
 class SCPI_Server:
 
@@ -110,15 +111,36 @@ class TimeManager:
             print(f"Elapsed Time: {elapsed_time:.2f} seconds")
             time.sleep(2)
 
+def GUI():
+    root = tk.Tk()
+    root.title("SCPI Server GUI")
+    root.geometry("300x400")
+    label = tk.Label(root, text="SCPI Server is running...")
+    label.grid(column=0, row=0, padx=10, pady=10)
+    button = tk.Button(root, text="Start Server", command=root.quit)
+    button.grid(column=0, row=1, padx=10, pady=10)
+    HOST_var=tk.StringVar(value=server.HOST)
+    
+    label_HOST=tk.Label(root,text="HOST:").grid(column=0, row=2, padx=10, pady=10)
+    HOST_entry=tk.Entry(root,textvariable=HOST_var)
+    HOST_entry.grid(column=0, row=3, padx=10, pady=10)
 
+    label_PORT=tk.Label(root,text="PORT:").grid(column=0, row=4, padx=10, pady=10)
+    PORT_var=tk.StringVar(value=str(server.PORT))
+    PORT_entry=tk.Entry(root,textvariable=PORT_var)
+    PORT_entry.grid(column=0, row=5, padx=10, pady=10)
+
+
+    root.mainloop()
 
 if __name__ == "__main__":
     timer=TimeManager()
     server=SCPI_Server()
     curve = generator()
+    GUI_thread = threading.Thread(target=GUI, daemon=True)
+    GUI_thread.start()
     
-
-#generate the data set (for voltage measurements)
+    #generate the data set (for voltage measurements)
     try:
          server.time, server.data = server.data_generator()
          
