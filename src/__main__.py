@@ -1,15 +1,21 @@
 
 #import argparse #for command line arguments
+
+#main imports
+import json
+import os
+from pathlib import Path
+import threading
+
+# server and data imports
 from ast import While
 from drivers.drivers import KeysightGenericCommands as kgc #importing the keysight commands class
 from drivers.drivers import GenericCommands as gc #importing the generic commands class
 from generators.generators import AGM12VGeneric as generator #importing the battery discharge generator class
 import socket
-import json
-import os
-from pathlib import Path
 import time
-import threading
+
+#GUI imports
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -120,18 +126,19 @@ class GUI:
         self.root.geometry("1000x1000")
         label = tk.Label(self.root, text="SCPI Server is running...")
         label.grid(column=0, row=0, padx=10, pady=10)
-        button = tk.Button(self.root, text="Start Server", command=self.root.quit)
-        button.grid(column=0, row=1, padx=10, pady=10)
+        button_start = tk.Button(self.root, text="Start Server", command=self.root.quit).grid(column=1, row=1, padx=10, pady=10)
+        button_stop = tk.Button(self.root, text="Stop Server", command=self.root.quit).grid(column=0, row=1, padx=10, pady=10)
+    
         HOST_var=tk.StringVar(value=server.HOST)
     
         label_HOST=tk.Label(self.root,text="HOST:").grid(column=0, row=2, padx=10, pady=10)
         HOST_entry=tk.Entry(self.root,textvariable=HOST_var)
-        HOST_entry.grid(column=0, row=3, padx=10, pady=10)
+        HOST_entry.grid(column=1, row=2, padx=10, pady=10)
 
         label_PORT=tk.Label(self.root,text="PORT:").grid(column=0, row=4, padx=10, pady=10)
         PORT_var=tk.StringVar(value=str(server.PORT))
         PORT_entry=tk.Entry(self.root,textvariable=PORT_var)
-        PORT_entry.grid(column=0, row=5, padx=10, pady=10)
+        PORT_entry.grid(column=1, row=4, padx=10, pady=10)
         self.plotting()
         self.root.mainloop()
         
@@ -140,7 +147,7 @@ class GUI:
         fig= curve.display()
         canvas = FigureCanvasTkAgg(fig, master=self.root)
         canvas.draw()
-        canvas.get_tk_widget().grid(column=0, row=6, padx=10, pady=10)
+        canvas.get_tk_widget().grid(column=2, row=0, rowspan=6, sticky="nsew", padx=10, pady=10)
 
 
  
@@ -150,8 +157,6 @@ if __name__ == "__main__":
     server=SCPI_Server()
     curve = generator()
     display = GUI()
-    #GUI_thread = threading.Thread(target=display.GUI, daemon=True)
-    #GUI_thread.start()
     
     #generate the data set (for voltage measurements)
     try:
@@ -169,6 +174,9 @@ if __name__ == "__main__":
         display.GUI()
     except Exception as e:
         print(f"Error in main execution: {e}")  
+    except KeyboardInterrupt:
+        print("Main execution interrupted by user.")
+        exit(0)
 
 
     
