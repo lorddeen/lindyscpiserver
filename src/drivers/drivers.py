@@ -26,7 +26,7 @@ class KeysightGenericCommands:
             response = "NICE TRY, NO RESISTANCE MEASUREMENT"
         else:
             response = "ERROR: Unknown Command"
-        print(response)
+        #print(response)
                 
 
         return response
@@ -53,7 +53,7 @@ class GenericCommands:
             response = "NICE TRY, NO RESISTANCE MEASUREMENT"
         else:
             response = "ERROR: Unknown Command"
-        print(response)
+        #print(response)
                 
 
         return response
