@@ -1,42 +1,60 @@
-# SCPI Multimeter Simulator
+# Lindy SCPI Server - Mock Instrument simulator
 
-This project is a digital multimeter simulator that communicates via standardized SCPI commands over a TCP/IP network. It generates a realistic discharge curve for a 12V AGM battery and allows users to "measure" this voltage through network queries, simulating a Keysight-style instrument.
+This project is a measurement instrument simulator (e.g., digital multimeters) communicating via the **SCPI** (Standard Commands for Programmable Instruments) protocol. It allows for testing data acquisition software without the need for physical hardware connectivity.
 
-## Key Features
+The simulator generates real-time voltage data corresponding to the **discharge curve of a 12V AGM battery** and responds to queries over a TCP/IP socket.
 
-Battery Discharge Simulation: Generates a voltage curve based on an exponential decay model for a standard 12V AGM battery.SCPI Server: Listens on port 5025 (the standard SCPI port) and processes incoming text commands via TCP.Data Visualization: Automatically plots the generated discharge curve using matplotlib upon startup.Sequential Measurement: Each voltage query (MEAS:VOLT?) returns the next data point in the pre-generated time series.
+## 🚀 Key Features
 
-# Installation & Requirements
+* **SCPI Server**: Communication via TCP/IP (default port 5025).
+* **Dynamic Data**: Instead of static values, it simulates a realistic battery voltage drop over time using a mathematical model.
+* **GUI Interface**: A Tkinter window to monitor server status and configure connection settings.
+* **Parser Selection**: Supports different response formats based on the selected device driver.
 
-The project requires Python 3 and several libraries for mathematical calculations and plotting.Clone the repository:Bashgit clone https://github.com/your-username/multimeter-simulator.git
-cd multimeter-simulator
+## 🛠️ Parser Architecture
 
-* Install dependencies:Bashpip install numpy matplotlib
+The application allows switching between two types of parsers (drivers) directly in the configuration:
 
-# Usage
+1.  **Keysight Parser (`keysight`)**: Emulates the specific behavior of a Keysight 34461A multimeter, including its precise Identification String (IDN).
+2.  **Generic Parser (`generic`)**: A basic implementation for general-purpose measurement devices.
 
-Start the Server:Run the main script to initialize the data and start the listener:Bashpython __main__.py
-The program will first display a graph of the discharge curve.Once the graph window is closed, the SCPI server starts listening on 127.0.0.1:5025.Connecting to the Simulator:You can connect using any TCP client (e.g., Telnet, Putty, or a custom Python script).Example Interaction:PlaintextSent: *IDN?
-Response: LINDY TECHNOLOGIES,AABBCC,!!ONLY VOLTAGE MEASUREMENTS NOW!!
+The parser selection is managed in the `config.json` file using the `"DRIVER"` key.
 
-Sent: MEAS:VOLT?
-Response: 12.854... (current voltage value)
+## 📁 Project Structure
 
-## Supported SCPI Commands
-CommandDescription *IDN? Returns the device identification string.MEAS:VOLT?Returns the current simulated voltage measurement.MEAS:CURR?Returns an error message (current measurement not supported).MEAS:RES?Returns an error message (resistance measurement not supported).
+* `__main__.py`: The main entry point, managing threads for the GUI and the network server.
+* `drivers.py`: Contains the `KeysightGenericCommands` and `GenericCommands` classes for processing SCPI commands.
+* `batt_dis_gen.py`: Logic for the discharge curve generator (`AGM12VGeneric`) based on exponential decay.
+* `config.json`: Configuration for host, port, and active driver.
 
-## Project Structure
-* __main__.py: The entry point that manages the TCP socket and coordinates between the generator and the SCPI parser.
+## 🔌 Supported SCPI Commands
 
-* generators/batt_dis_gen.py: Contains the AGM12VGeneric class for calculating the battery model using numpy
+The server responds to the following standardized commands:
 
-* drivers/keysight_commands_module.py: Implements the KeysightGenericCommands class to parse SCPI strings and return appropriate responses.
+| Command | Description | Example Response |
+| :--- | :--- | :--- |
+| `*IDN?` | Identification Query | `LINDY TECHNOLOGIES,34461A,...` |
+| `MEAS:VOLT?` | Measure current voltage | `1.28543E+01` (Scientific notation) |
+| `MEAS:CURR?` | Measure current | "NICE TRY, NO CURRENT MEASUREMENT" |
 
-## imulation Configuration
-You can modify the simulation behavior in batt_dis_gen.py by adjusting these parameters:
-* chargedbattvolt: The starting voltage of the battery (default 13V)
-* timeoffset: The total duration of the simulation in seconds (default 3600s)
-* exponent: The rate of voltage decay.
+## 📊 Battery Discharge Model
 
-## License
-This project is licensed under the MIT License:
+Discharge is simulated using an exponential function that calculates voltage based on the elapsed time since the server started:
+
+$$V(t) = V_{charged} - V_{discharge} \cdot e^{k \cdot (t - t_{offset})}$$
+*(Where $k$ is the discharge exponent and $t$ is the time since start)*
+
+## ⚙️ Installation and Setup
+
+1.  **Install dependencies:**
+    ```bash
+    pip install numpy matplotlib
+    ```
+
+2.  **Configuration:**
+    Edit `config/config.json` to set your desired parser (`keysight` or `generic`).
+
+3.  **Run the application:**
+    ```bash
+    python __main__.py
+    ```
