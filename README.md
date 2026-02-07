@@ -1,31 +1,29 @@
-# Lindy SCPI Server - Mock Instrument simulator
+# 🔋 Lindy SCPI Server - Mock Instrument Simulator
 
 This project is a measurement instrument simulator (e.g., digital multimeters) communicating via the **SCPI** (Standard Commands for Programmable Instruments) protocol. It allows for testing data acquisition software without the need for physical hardware connectivity.
 
-The simulator generates real-time voltage data corresponding to the **discharge curve of a 12V AGM battery** and responds to queries over a TCP/IP socket.
+The simulator generates real-time data corresponding to the **discharge curve of a 12V AGM battery** and responds to queries over a TCP/IP socket.
 
 ## 🚀 Key Features
 
-* **SCPI Server**: Communication via TCP/IP (default port 5025).
-* **Dynamic Data**: Instead of static values, it simulates a realistic battery voltage drop over time using a mathematical model.
-* **GUI Interface**: A Tkinter window to monitor server status and configure connection settings.
-* **Parser Selection**: Supports different response formats based on the selected device driver.
+* **SCPI Server**: Communication via TCP/IP (default port 5025) running in a separate background thread.
+* **Dynamic Data**: Simulates a realistic battery voltage drop over time using a mathematical model.
+* **Integrated GUI**: A Tkinter window with an embedded Matplotlib graph for real-time visualization of the discharge curve.
+* **Flexible Architecture**: Support for different command parsers (Keysight, Generic) defined in the configuration.
 
-## 🛠️ Parser Architecture
+## 🛠️ Driver Architecture
 
-The application allows switching between two types of parsers (drivers) directly in the configuration:
+The application allows switching between different command parsers directly in the `config.json` file:
 
-1.  **Keysight Parser (`keysight`)**: Emulates the specific behavior of a Keysight 34461A multimeter, including its precise Identification String (IDN).
-2.  **Generic Parser (`generic`)**: A basic implementation for general-purpose measurement devices.
-
-The parser selection is managed in the `config.json` file using the `"DRIVER"` key.
+1.  **Keysight (`keysight`)**: Emulates the specific behavior of a Keysight 34461A multimeter.
+2.  **Generic (`generic`)**: A basic implementation for general-purpose measurement devices.
 
 ## 📁 Project Structure
 
-* `__main__.py`: The main entry point, managing threads for the GUI and the network server.
-* `drivers.py`: Contains the `KeysightGenericCommands` and `GenericCommands` classes for processing SCPI commands.
-* `batt_dis_gen.py`: Logic for the discharge curve generator (`AGM12VGeneric`) based on exponential decay.
-* `config.json`: Configuration for host, port, and active driver.
+* `__main__.py`: The main entry point, managing threads, the GUI (Tkinter), and the `TimeManager`.
+* `drivers/drivers.py`: Contains the `KeysightGenericCommands` and `GenericCommands` classes for processing SCPI commands.
+* `generators/generators.py`: Logic for the discharge curve generator `AGM12VGeneric`.
+* `config/config.json`: Configuration for the host, port, and active driver.
 
 ## 🔌 Supported SCPI Commands
 
@@ -34,15 +32,15 @@ The server responds to the following standardized commands:
 | Command | Description | Example Response |
 | :--- | :--- | :--- |
 | `*IDN?` | Identification Query | `LINDY TECHNOLOGIES,34461A,...` |
-| `MEAS:VOLT?` | Measure current voltage | `1.28543E+01` (Scientific notation) |
-| `MEAS:CURR?` | Measure current | "NICE TRY, NO CURRENT MEASUREMENT" |
+| `MEAS:VOLT?` | Measure current voltage | `1.28543E+01` |
+| `MEAS:CURR?` | Attempt current measurement | `NICE TRY, NO CURRENT MEASUREMENT` |
+| `MEAS:RES?` | Attempt resistance measurement | `NICE TRY, NO RESISTANCE MEASUREMENT` |
 
 ## 📊 Battery Discharge Model
 
-Discharge is simulated using an exponential function that calculates voltage based on the elapsed time since the server started:
+Discharge is simulated using an exponential function based on the time elapsed since the server started:
 
-$$V(t) = V_{charged} - V_{discharge} \cdot e^{k \cdot (t - t_{offset})}$$
-*(Where $k$ is the discharge exponent and $t$ is the time since start)*
+$$V(t) = V_{charged} - V_{discharge} \cdot e^{exponent \cdot (t - t_{offset})}$$
 
 ## ⚙️ Installation and Setup
 
@@ -52,7 +50,7 @@ $$V(t) = V_{charged} - V_{discharge} \cdot e^{k \cdot (t - t_{offset})}$$
     ```
 
 2.  **Configuration:**
-    Edit `config/config.json` to set your desired parser (`keysight` or `generic`).
+    Edit `config/config.json` to set your desired server parameters.
 
 3.  **Run the application:**
     ```bash
