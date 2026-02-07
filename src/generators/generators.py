@@ -26,7 +26,7 @@ class AGM12VGeneric:#battery discharge curve generator class
 
         #plotting the discharge curve
     def display(self):
-        fig = plt.figure(figsize=(10,6), dpi=100)
+        fig = plt.figure(figsize=(10,6), dpi=50)
         ax = fig.add_subplot(111)
         ax.plot(self.time,self.discurve)
         ax.set_title("Battery discharge curve for AGM Battery (common)")

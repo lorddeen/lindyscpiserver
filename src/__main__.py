@@ -3,7 +3,7 @@
 
 #main imports
 import json
-import os
+#import os
 from pathlib import Path
 import threading
 
@@ -41,25 +41,11 @@ class SCPI_Server:
                 print("Using Generic driver")
             self.timer_type = self.config.get("TIMER")
         
-      
-
-
-
-    def data_generator(self):
-         #create an instance of the generator class
-        #curve = generator()
-        curve.__init__()
-        print("Generating data...")
-        curve.generate_fullset()
-        print("Data generated.")
-        #curve.display()
-        return curve.time, curve.discurve
 
 
     def start_server(self):    
-        self.time, self.data = self.data_generator()
         scpi = self.parser() #create an instance of the selected commands class
-        
+        self.running = True
         #starting the SCPI server
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s: #create a TCP socket
             print(f"HOST: {self.HOST}, PORT: {self.PORT}")
@@ -69,7 +55,7 @@ class SCPI_Server:
             s.settimeout(0.5) #set timeout for accepting connections
             print(f"SCPI Server listening on {self.HOST}:{self.PORT}")
 
-            while True:
+            while self.running:
                 try:
                     conn, addr = s.accept()
                     break
@@ -80,7 +66,7 @@ class SCPI_Server:
              print(f"Connected by {addr}")
 
 
-             while True: #main server loop
+             while server.running: #main server loop
                     try:
                         data = conn.recv(1024)
                     except socket.timeout:
@@ -105,6 +91,13 @@ class SCPI_Server:
                         #self.datacounter += 1
                         conn.sendall(response.encode('utf-8'))
 
+    def stop_server(self):
+        print("Stopping server...")
+        self.running = False
+        # Implement server shutdown logic if needed
+        # For example, you could set a flag to exit the main loop in start_server
+        # or close the socket to stop accepting new connections.
+
 class TimeManager:
     def __init__(self):
         self.start_time = time.time()
@@ -120,34 +113,67 @@ class TimeManager:
             time.sleep(2)
 
 class GUI:
-    def GUI(self):
+    def __init__(self):
+        print("Initializing GUI...")
         self.root = tk.Tk()
+        self.curve = curve
+        self.server = server
+        self.server_thread = None
+   
+    def GUI(self):
         self.root.title("SCPI Server GUI")
-        self.root.geometry("1000x1000")
+        self.root.geometry("1000x500")
         label = tk.Label(self.root, text="SCPI Server is running...")
         label.grid(column=0, row=0, padx=10, pady=10)
-        button_start = tk.Button(self.root, text="Start Server", command=self.root.quit).grid(column=1, row=1, padx=10, pady=10)
-        button_stop = tk.Button(self.root, text="Stop Server", command=self.root.quit).grid(column=0, row=1, padx=10, pady=10)
+        button_start = tk.Button(self.root, text="Start Server", command=self.start_server).grid(column=1, row=1, padx=10, pady=10)
+        button_stop = tk.Button(self.root, text="Stop Server", command=self.stop_server).grid(column=0, row=1, padx=10, pady=10)
     
-        HOST_var=tk.StringVar(value=server.HOST)
-    
+        #config entries
+        self.HOST_var=tk.StringVar(value=server.HOST)
         label_HOST=tk.Label(self.root,text="HOST:").grid(column=0, row=2, padx=10, pady=10)
-        HOST_entry=tk.Entry(self.root,textvariable=HOST_var)
+        HOST_entry=tk.Entry(self.root,textvariable=self.HOST_var)
         HOST_entry.grid(column=1, row=2, padx=10, pady=10)
 
         label_PORT=tk.Label(self.root,text="PORT:").grid(column=0, row=4, padx=10, pady=10)
-        PORT_var=tk.StringVar(value=str(server.PORT))
-        PORT_entry=tk.Entry(self.root,textvariable=PORT_var)
+        self.PORT_var=tk.IntVar(value=server.PORT)
+        PORT_entry=tk.Entry(self.root,textvariable=self.PORT_var)
         PORT_entry.grid(column=1, row=4, padx=10, pady=10)
+
+        #plotting the discharge cuve
         self.plotting()
+
+        # main loop for the GUI
         self.root.mainloop()
         
+    def start_server(self):
+        self.server.HOST = self.HOST_var.get()
+        self.server.PORT = self.PORT_var.get()
+  
+        if self.server_thread is None or not self.server_thread.is_alive():
+            self.server_thread = threading.Thread(target=self.server.start_server, daemon=True)
+            try:
+                self.server_thread.start() 
+            except Exception as e:
+                print(f"Error starting server thread: {e}")
+            except KeyboardInterrupt:
+                print("Server thread interrupted by user.")
+
+    def stop_server(self):
+        self.server.stop_server()
+        if self.server_thread is not None:
+            self.server_thread.join(timeout=5)
+            if self.server_thread.is_alive():
+                print("Server thread did not terminate within timeout.")
+            else:
+                print("Server thread terminated successfully.")
+            
+
 
     def plotting(self):
         fig= curve.display()
         canvas = FigureCanvasTkAgg(fig, master=self.root)
         canvas.draw()
-        canvas.get_tk_widget().grid(column=2, row=0, rowspan=6, sticky="nsew", padx=10, pady=10)
+        canvas.get_tk_widget().grid(column=2, row=0, rowspan=10, sticky="nsew", padx=10, pady=10)
 
 
  
@@ -156,19 +182,11 @@ if __name__ == "__main__":
     timer=TimeManager()
     server=SCPI_Server()
     curve = generator()
+    curve.generate_fullset()
     display = GUI()
     
     #generate the data set (for voltage measurements)
     try:
-        server_thread = threading.Thread(target=server.start_server, daemon=True)
-        try:
-            server_thread.start() 
-        except Exception as e:
-            print(f"Error starting server thread: {e}")
-        except KeyboardInterrupt:
-            print("Server thread interrupted by user.")
-            exit(0)
- 
 
         #print("Data generation complete.")
         display.GUI()
