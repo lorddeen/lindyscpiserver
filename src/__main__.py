@@ -3,7 +3,7 @@
 from ast import While
 from drivers.drivers import KeysightGenericCommands as kgc #importing the keysight commands class
 from drivers.drivers import GenericCommands as gc #importing the generic commands class
-from generators.batt_dis_gen import AGM12VGeneric as generator #importing the battery discharge generator class
+from generators.generators import AGM12VGeneric as generator #importing the battery discharge generator class
 import socket
 import json
 import os
@@ -41,16 +41,17 @@ class SCPI_Server:
 
     def data_generator(self):
          #create an instance of the generator class
-        curve = generator()
+        #curve = generator()
         curve.__init__()
         print("Generating data...")
         curve.generate_fullset()
         print("Data generated.")
-        curve.display()
+        #curve.display()
         return curve.time, curve.discurve
 
 
-    def start_server(self):
+    def start_server(self):    
+        self.time, self.data = self.data_generator()
         scpi = self.parser() #create an instance of the selected commands class
         
         #starting the SCPI server
@@ -116,7 +117,7 @@ class GUI:
     def GUI(self):
         self.root = tk.Tk()
         self.root.title("SCPI Server GUI")
-        self.root.geometry("300x400")
+        self.root.geometry("1000x1000")
         label = tk.Label(self.root, text="SCPI Server is running...")
         label.grid(column=0, row=0, padx=10, pady=10)
         button = tk.Button(self.root, text="Start Server", command=self.root.quit)
@@ -131,11 +132,12 @@ class GUI:
         PORT_var=tk.StringVar(value=str(server.PORT))
         PORT_entry=tk.Entry(self.root,textvariable=PORT_var)
         PORT_entry.grid(column=0, row=5, padx=10, pady=10)
+        self.plotting()
         self.root.mainloop()
-        #self.plotting()
+        
 
-    def plotting(self, time, data):
-        fig, ax = curve.plot_data(time, data)
+    def plotting(self):
+        fig= curve.display()
         canvas = FigureCanvasTkAgg(fig, master=self.root)
         canvas.draw()
         canvas.get_tk_widget().grid(column=0, row=6, padx=10, pady=10)
@@ -148,20 +150,25 @@ if __name__ == "__main__":
     server=SCPI_Server()
     curve = generator()
     display = GUI()
-    GUI_thread = threading.Thread(target=display.GUI, daemon=True)
-    GUI_thread.start()
+    #GUI_thread = threading.Thread(target=display.GUI, daemon=True)
+    #GUI_thread.start()
     
     #generate the data set (for voltage measurements)
     try:
-         server.time, server.data = server.data_generator()
-         display.plotting(server.time, server.data)
-    except Exception as e:
-        print(f"Error generating data: {e}")
-        exit(1)
-    
-    while True:
+        server_thread = threading.Thread(target=server.start_server, daemon=True)
         try:
-            server.start_server() #start the SCPI server
+            server_thread.start() 
+        except Exception as e:
+            print(f"Error starting server thread: {e}")
         except KeyboardInterrupt:
-            print("Server stopped by user.")
-            break
+            print("Server thread interrupted by user.")
+            exit(0)
+ 
+
+        #print("Data generation complete.")
+        display.GUI()
+    except Exception as e:
+        print(f"Error in main execution: {e}")  
+
+
+    
